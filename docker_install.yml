@@ -3,6 +3,7 @@
 - hosts: test1
   become: true
 
+
   tasks:
     - name: insatll DOCKER
       yum:
@@ -12,4 +13,3 @@
       service:
         name: docker
         state: started
-        
