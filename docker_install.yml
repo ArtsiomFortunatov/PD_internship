@@ -12,3 +12,4 @@
       service:
         name: docker
         state: started
+        
