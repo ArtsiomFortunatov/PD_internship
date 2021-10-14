@@ -1,0 +1,14 @@
+---
+
+- hosts: test1
+  become: true
+
+  tasks:
+    - name: insatll DOCKER
+      yum:
+        name: docker
+        state: latest
+    - name: start DOCKER
+      service:
+        name: docker
+        state: started
