@@ -1,0 +1,31 @@
+---
+
+- hosts: test3
+  become: true
+
+  tasks:
+    - name: insatll DOCKER
+      yum:
+        name: docker
+        state: latest
+    - name: start DOCKER
+      service:
+        name: docker
+        state: started
+    - name: insatll Python3
+      yum:
+        name: python37
+        state: latest
+      vars:
+          ansible_python_interpreter: /bin/python2.7
+    - name: insatll Modyle
+      pip:
+        name: "docker<5"
+        executable: pip3.7
+    - name: container nginx
+      docker_container:
+        name: nginxPD
+        image: "2757429/myimage:latest"
+        ports: ['8080:80']
+      vars:
+          ansible_python_interpreter: /bin/python3.7
