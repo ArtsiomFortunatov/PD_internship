@@ -8,10 +8,11 @@ pipeline {
                 
                 sh '''
                  cd Nginx01
-                 sudo docker image build --no-cache -t myimage:nginx .
+                 sudo docker image prune -f
+                 sudo docker image build --no-cache -t myimage2 .
                  sudo docker login -u 2757429 -p judaspriest
-                 sudo docker image tag myimage:nginx 2757429/myimage:latest
-                 sudo docker image push 2757429/myimage:latest
+                 sudo docker image tag myimage2 2757429/myimage2
+                 sudo docker image push 2757429/myimage2
                 '''  
             }
         }
