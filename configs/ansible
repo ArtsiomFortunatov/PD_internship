@@ -22,10 +22,14 @@
       pip:
         name: "docker<5"
         executable: pip3.7
+        
+    - name: remove not actual image
+      shell: sudo docker image rm  2757429/myimage2 -f
+      
     - name: container nginx
       docker_container:
         name: nginxPD
-        image: "2757429/myimage:latest"
+        image: "2757429/myimage2"
         ports: ['8080:80']
       vars:
           ansible_python_interpreter: /bin/python3.7
