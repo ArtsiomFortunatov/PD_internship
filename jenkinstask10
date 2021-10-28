@@ -1,0 +1,17 @@
+
+pipeline {
+    agent none
+    stages {
+        stage('DockerFILE') {
+            agent { label 'dockerhost'}
+            steps {
+                git url: 'https://github.com/ArtsiomFortunatov/PD_internship.git'
+                
+                sh '''
+                 cd TASK10/compose
+                 curl -L https://github.com/kubernetes/kompose/releases/download/v1.24.0/kompose-linux-amd64 -o kompose
+                 kompose convert
+                 kubectl apply -f nginx-ssl-service.yaml,nginx-ssl-deployment.yaml
+                '''  
+            }
+        }
