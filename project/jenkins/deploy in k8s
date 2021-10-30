@@ -1,0 +1,6 @@
+cd /home/ec2-user/workspace/terraform/project/services/
+curl -L https://github.com/kubernetes/kompose/releases/download/v1.24.0/kompose-linux-amd64 -o kompose
+kompose convert
+sh addprobe.sh
+sudo aws eks --region eu-central-1 update-kubeconfig --name my-eks-cluster
+sudo -s kubectl apply -f nginx-ssl-service.yaml
