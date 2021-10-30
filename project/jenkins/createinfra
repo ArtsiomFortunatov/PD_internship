@@ -8,7 +8,7 @@ pipeline {
         stage('Get git') {
           agent { label 'dockernode'}
           steps {
-               git url: 'https://github.com/ArtsiomFortunatov/PD_Project.git'
+              git url: 'https://github.com/ArtsiomFortunatov/PD_internship.git'
               
           }
             
@@ -34,8 +34,19 @@ pipeline {
             steps {
                
                 sh '''
-                 cd terraform
+                 cd project/terraform
                  terraform init
+                 
+                '''  
+            }
+        }
+          stage('Replace locals') {
+            agent { label 'dockernode'}
+            steps {
+               
+                sh '''
+                 cd project/terraform
+                 cp locals.tf /home/ec2-user/workspace/terraform/project/terraform/.terraform/modules/eks/
                  
                 '''  
             }
@@ -45,8 +56,20 @@ pipeline {
             steps {
                
                 sh '''
-                 terraform apply -auto-aprove
+                 cd project/terraform
+                 terraform apply --auto-approve
                  
+                '''  
+            }
+          
+        }
+          stage('Unset AWS') {
+            agent { label 'dockernode'}
+            steps {
+               
+                sh '''
+                 unset AWS_SECRET_ACCESS_KEY
+                 unset AWS_ACCESS_KEY_ID
                 '''  
             }
         }
