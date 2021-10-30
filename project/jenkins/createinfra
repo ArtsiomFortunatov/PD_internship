@@ -1,0 +1,54 @@
+
+pipeline {
+    agent none
+     tools {
+        terraform 'terraformPD'
+            }
+    stages {
+        stage('Get git') {
+          agent { label 'dockernode'}
+          steps {
+               git url: 'https://github.com/ArtsiomFortunatov/PD_Project.git'
+              
+          }
+            
+        }
+        stage('Connect to aws') {
+          agent { label 'dockernode'}
+          steps {
+               wrap([$class: "MaskPasswordsBuildWrapper",
+               varPasswordPairs: [[password: ACCESSKEY], [password: SECRETKEY]]]) {
+               sh '''
+               export AWS_ACCESS_KEY_ID=$ACCESSKEY
+               export AWS_SECRET_ACCESS_KEY=$SECRETKEY
+               
+               '''
+                }
+              
+          }
+            
+        }
+        
+        stage('Terraform init') {
+            agent { label 'dockernode'}
+            steps {
+               
+                sh '''
+                 cd terraform
+                 terraform init
+                 
+                '''  
+            }
+        }
+           stage('Terraform apply') {
+            agent { label 'dockernode'}
+            steps {
+               
+                sh '''
+                 terraform apply -auto-aprove
+                 
+                '''  
+            }
+        }
+    }
+}    
