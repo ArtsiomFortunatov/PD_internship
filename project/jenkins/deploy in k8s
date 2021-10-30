@@ -4,3 +4,6 @@ kompose convert
 sh addprobe.sh
 sudo aws eks --region eu-central-1 update-kubeconfig --name my-eks-cluster
 sudo -s kubectl apply -f nginx-ssl-service.yaml
+cd hpa
+sudo -s kubectl apply -f hpa.yaml
+sudo -s kubectl apply -f hpa-deployment-example.yaml
