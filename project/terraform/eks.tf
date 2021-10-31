@@ -6,7 +6,7 @@ module "eks" {
  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git"
  cluster_name = local.cluster_name  
  cluster_version = "1.21"
- #vpc_id = "${aws_vpc.vpc.id}"
+ vpc_id = "${aws_vpc.vpc.id}"
  #vpc_id = "vpc-07efdbb7e88e8db70"
  subnets = [ "${aws_subnet.subnet_public.id}", "${aws_subnet.subnet_public1.id}" ]
 
