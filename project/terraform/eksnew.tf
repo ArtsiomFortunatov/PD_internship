@@ -1,81 +1,47 @@
-# Creating IAM role for Kubernetes clusters to make calls to other AWS services on your behalf to manage the resources that you use with the service.
+resource "aws_iam_role" "eks_cluster" {
+  name = "eks-cluster"
 
-resource "aws_iam_role" "iam-role-eks-cluster" {
-  name = "terraformekscluster"
   assume_role_policy = <<POLICY
 {
- "Version": "2012-10-17",
- "Statement": [
-   {
-   "Effect": "Allow",
-   "Principal": {
-    "Service": "eks.amazonaws.com"
-   },
-   "Action": "sts:AssumeRole"
-   }
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "eks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
   ]
- }
+}
 POLICY
 }
 
-# Attaching the EKS-Cluster policies to the terraformekscluster role.
-
-resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = "${aws_iam_role.iam-role-eks-cluster.name}"
+  role       = aws_iam_role.eks_cluster.name
 }
 
+resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  role       = aws_iam_role.eks_cluster.name
+}
 
-# Security group for network traffic to and from AWS EKS Cluster.
+resource "aws_eks_cluster" "aws_eks" {
+  name     = "eks_cluster_tuto"
+  role_arn = aws_iam_role.eks_cluster.arn
 
-resource "aws_security_group" "eks-cluster" {
-  name        = "SG-eks-cluster"
-  vpc_id      = "vpc-123456789"  
-
-# Egress allows Outbound traffic from the EKS cluster to the  Internet 
-
-  egress {                   # Outbound Rule
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-# Ingress allows Inbound traffic to EKS cluster from the  Internet 
-
-  ingress {                  # Inbound Rule
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  vpc_config {
+    subnet_ids = ["subnet-4d0d3324", "subnet-b3a8f9c8"]
   }
 
+  tags = {
+    Name = "EKS_tuto"
+  }
 }
-
-# Creating the EKS cluster
-
-resource "aws_eks_cluster" "eks_cluster" {
-  name     = "terraformEKScluster"
-  role_arn =  "${aws_iam_role.iam-role-eks-cluster.arn}"
-  version  = "1.19"
-
-# Adding VPC Configuration
-
-  vpc_config {             # Configure EKS with vpc and network settings 
-   security_group_ids = ["${aws_security_group.eks-cluster.id}"]
-   subnet_ids         = ["subnet-1312586","subnet-8126352"] 
-    }
-
-  depends_on = [
-    "aws_iam_role_policy_attachment.eks-cluster-AmazonEKSClusterPolicy",
-    "aws_iam_role_policy_attachment.eks-cluster-AmazonEKSServicePolicy",
-   ]
-}
-
-# Creating IAM role for EKS nodes to work with other AWS Services. 
-
 
 resource "aws_iam_role" "eks_nodes" {
-  name = "eks-node-group"
+  name = "eks-node-group-tuto"
 
   assume_role_policy = <<POLICY
 {
@@ -93,8 +59,6 @@ resource "aws_iam_role" "eks_nodes" {
 POLICY
 }
 
-# Attaching the different Policies to Node Members.
-
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.eks_nodes.name
@@ -110,13 +74,11 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   role       = aws_iam_role.eks_nodes.name
 }
 
-# Create EKS cluster node group
-
 resource "aws_eks_node_group" "node" {
-  cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = "node_group1"
+  cluster_name    = aws_eks_cluster.aws_eks.name
+  node_group_name = "node_tuto"
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = ["subnet-","subnet-"]
+  subnet_ids      = ["<subnet-1>", "<subnet-2>"]
 
   scaling_config {
     desired_size = 1
@@ -124,6 +86,8 @@ resource "aws_eks_node_group" "node" {
     min_size     = 1
   }
 
+  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
+  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
