@@ -2,7 +2,7 @@ locals {
  cluster_name = "my-eks-cluster"
 }
 module "vpc" {
-  source = "git::ssh://git@github.com/reactiveops/terraform-vpc.git?ref=3.0.0"
+  source = "git::https://github.com/FairwindsOps/terraform-vpc.git"
 
   aws_region = "eu-central-1"
   az_count   = 3
