@@ -4,8 +4,8 @@ resource "aws_db_instance" "myrds" {
   allocated_storage      = 5
   engine                 = "mysql"
   engine_version         = "8.0.23"
-  username               = "admin"
-  password               = "Admin123"
+  username               =  var.userdb
+  password               =  var.passworddb
   publicly_accessible    = true
   skip_final_snapshot    = true
 }
