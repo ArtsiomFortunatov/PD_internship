@@ -8,7 +8,6 @@ data "aws_kms_secrets" "creds" {
 locals {
   db_creds = yamldecode(data.aws_kms_secrets.creds.plaintext["db"])
 }
-
 resource "aws_db_instance" "myrds" {
   identifier             = "myrds"
   instance_class         = "db.t2.micro"
