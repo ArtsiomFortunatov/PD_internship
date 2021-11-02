@@ -25,7 +25,7 @@ locals {
 
   worker_groups_platforms = [for x in concat(var.worker_groups, var.worker_groups_launch_template) : try(x.platform, var.workers_group_defaults["platform"], var.default_platform)]
 
-  worker_ami_name_filter         = coalesce(var.worker_ami_name_filter, "amazon-eks-node-1.11-v20190109")
+  worker_ami_name_filter         = coalesce(var.worker_ami_name_filter, "amazon-eks-node-${coalesce(var.cluster_version, "cluster_version")}-v*")
   worker_ami_name_filter_windows = coalesce(var.worker_ami_name_filter_windows, "Windows_Server-2019-English-Core-EKS_Optimized-${coalesce(var.cluster_version, "cluster_version")}-*")
 
   ec2_principal     = "ec2.${data.aws_partition.current.dns_suffix}"
@@ -163,13 +163,14 @@ locals {
   ]
 
   kubeconfig = var.create_eks ? templatefile("${path.module}/templates/kubeconfig.tpl", {
-    kubeconfig_name                   = coalesce(var.kubeconfig_name, "eks_${var.cluster_name}")
-    endpoint                          = local.cluster_endpoint
-    cluster_auth_base64               = local.cluster_auth_base64
-    aws_authenticator_command         = var.kubeconfig_aws_authenticator_command
-    aws_authenticator_command_args    = coalescelist(var.kubeconfig_aws_authenticator_command_args, ["token", "-i", local.cluster_name])
-    aws_authenticator_additional_args = var.kubeconfig_aws_authenticator_additional_args
-    aws_authenticator_env_variables   = var.kubeconfig_aws_authenticator_env_variables
+    kubeconfig_name                         = coalesce(var.kubeconfig_name, "eks_${var.cluster_name}")
+    endpoint                                = local.cluster_endpoint
+    cluster_auth_base64                     = local.cluster_auth_base64
+    aws_authenticator_kubeconfig_apiversion = var.kubeconfig_api_version
+    aws_authenticator_command               = var.kubeconfig_aws_authenticator_command
+    aws_authenticator_command_args          = coalescelist(var.kubeconfig_aws_authenticator_command_args, ["token", "-i", local.cluster_name])
+    aws_authenticator_additional_args       = var.kubeconfig_aws_authenticator_additional_args
+    aws_authenticator_env_variables         = var.kubeconfig_aws_authenticator_env_variables
   }) : ""
 
   launch_configuration_userdata_rendered = [
