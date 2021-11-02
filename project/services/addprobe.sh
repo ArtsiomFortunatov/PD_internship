@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cat <<EOT >> pod1.yaml
+ 
  readinessProbe:
    tcpSocket:
      port: 80
